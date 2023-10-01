@@ -1,12 +1,15 @@
 const express = require("express");
-const {ApolloServer, gql} = require('apollo-server-express')
+// const {ApolloServer, gql} = require('apollo-server-express')
+const { graphqlHTTP } = require ('express-graphql')
+const { makeExecutableSchema } = require ('@graphql-tools/schema')
+
 
 const port = process.env.PORT || 4000
 
 // app.get("/", (req, res) => res.send("Hello Web Server!!!"))
 
 //schema
-const typeDefs = gql`
+const typeDefs = `
     type Query{
         hello: String
     }
@@ -21,8 +24,18 @@ const resolvers = {
 
 const app = express();
 
-// server setup
-const server = new ApolloServer({typeDefs, resolvers});
+const executableSchema = makeExecutableSchema({
+    typeDefs,
+    resolvers,
+  })
+  
+  app.use(
+    '/graphql',
+    graphqlHTTP({
+      schema: executableSchema,
+      graphiql: true,
+    })
+  )
 
 // applying apollogql middleware and setting to path api
 server.applyMiddleware({ app, path: '/api'});
