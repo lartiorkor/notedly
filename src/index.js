@@ -37,10 +37,10 @@ const executableSchema = makeExecutableSchema({
     })
   )
 
-// applying apollogql middleware and setting to path api
-server.applyMiddleware({ app, path: '/api'});
+// // applying apollogql middleware and setting to path api
+// server.applyMiddleware({ app, path: '/api'});
 
 app.listen({port}, () => 
-    console.log(`GraphQl server running at http://localhost: ${port}${server.graphqlPath}`
+    console.log(`GraphQl server running at http://localhost: ${port}`
     )
 );
