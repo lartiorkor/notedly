@@ -1,46 +1,44 @@
 const express = require("express");
-// const {ApolloServer, gql} = require('apollo-server-express')
-const { graphqlHTTP } = require ('express-graphql')
-const { makeExecutableSchema } = require ('@graphql-tools/schema')
+const { graphqlHTTP } = require('express-graphql');
+const { makeExecutableSchema } = require('@graphql-tools/schema');
 
+const port = process.env.PORT || 4000;
 
-const port = process.env.PORT || 4000
+// Create an Express app
+const app = express();
 
-// app.get("/", (req, res) => res.send("Hello Web Server!!!"))
+// Apply middleware to parse JSON request bodies
+app.use(express.json());
 
-//schema
+// Define your GraphQL schema and resolvers
 const typeDefs = `
-    type Query{
+    type Query {
         hello: String
     }
 `;
 
-//resolver
 const resolvers = {
     Query: {
         hello: () => 'Hello World!'
     }
 };
 
-const app = express();
-
+// Create an executable schema
 const executableSchema = makeExecutableSchema({
     typeDefs,
     resolvers,
-  })
-  
-  app.use(
+});
+
+// Use express-graphql middleware to handle GraphQL requests
+app.use(
     '/graphql',
     graphqlHTTP({
-      schema: executableSchema,
-      graphiql: true,
+        schema: executableSchema,
+        graphiql: true,
     })
-  )
+);
 
-// // applying apollogql middleware and setting to path api
-// server.applyMiddleware({ app, path: '/api'});
-
-app.listen({port}, () => 
-    console.log(`GraphQl server running at http://localhost: ${port}`
-    )
+// Start the Express server
+app.listen(port, () =>
+    console.log(`GraphQL server running at http://localhost:${port}/graphql`)
 );
