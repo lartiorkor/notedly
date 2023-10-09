@@ -11,16 +11,31 @@ const { json } = pkg;
     const app = express();
     const httpServer = http.createServer(app);
 
+    let notes = [
+        { id: '1', content: 'This is a note', author: 'Adam Scott' },
+        { id: '2', content: 'This is another note', author: 'Harlow Everly' },
+        { id: '3', content: 'Oh hey look, another note!', author: 'Riley Harrison' }
+        ];
+
     const typeDefs = `#graphql
+
+    type Note {
+        id: ID!
+        content: String!
+        author: String!
+    }
+
     type Query {
         hello: String
+        notes: [Note!]!
     }
     `;
 
-    // Define your resolvers
+   // Define your resolvers
     const resolvers = {
         Query: {
             hello: () => 'world',
+            notes: () => notes
         },
     };
 
