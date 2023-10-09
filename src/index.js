@@ -1,36 +1,46 @@
-// app.js
-const express = require('express');
+// npm install @apollo/server express graphql cors body-parser
 const { ApolloServer } = require('@apollo/server');
+const { expressMiddleware } = require('@apollo/server/express4');
+const { ApolloServerPluginDrainHttpServer } = require('@apollo/server/plugin/drainHttpServer');
+const express = require('express');
+const http = require ('http');
+const cors = require('cors');
+const pkg = require ('body-parser');
+const { json } = pkg;
+(async function() {
+    const app = express();
+    const httpServer = http.createServer(app);
 
-const app = express();
+    const typeDefs = `#graphql
+    type Query {
+        hello: String
+    }
+    `;
 
-// Define your GraphQL schema using Apollo Server's gql template literal
-// The GraphQL schema
-const typeDefs = `#graphql
-  type Query {
-    hello: String
-  }
-`;
+    // Define your resolvers
+    const resolvers = {
+        Query: {
+            hello: () => 'world',
+        },
+    };
 
-// Define your resolvers
-const resolvers = {
-    Query: {
-        hello: () => 'world',
-    },
-};
+    const server = new ApolloServer({
+    typeDefs,
+    resolvers,
+    plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+    });
 
-// Create an Apollo Server instance and connect it to Express
-const server = new ApolloServer({ typeDefs, resolvers });
+    await server.start();
 
-// Apply the Apollo Server middleware to Express
-// server.applyMiddleware({ app });
+    app.use(
+    '/graphql',
+    cors(),
+    json(),
+    expressMiddleware(server, {
+        context: async ({ req }) => ({ token: req.headers.token }),
+    }),
+    );
 
-// Define a route for Express to handle GraphQL requests (optional)
-app.get('/graphql', (req, res) => {
-    res.send('GraphQL is running!');
-});
-
-// Start the Express server
-app.listen({ port: 4000 }, () =>
-    console.log(`Server is running at http://localhost:4000/graphql`)
-);
+    await new Promise((resolve) => httpServer.listen({ port: 4000 }, resolve));
+    console.log(`🚀 Server ready at http://localhost:4000/graphql`);
+})()
